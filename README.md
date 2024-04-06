@@ -77,6 +77,13 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 _ clone project to `/var/www/wholesale-linker-admin`
 
+_ run command:
+
+```
+sudo chown -R www-data:www-data /var/www/wholesale-linker-admin/storage/
+sudo chmod -R 775 /var/www/wholesale-linker-admin/storage/
+```
+
 _install php, mysql, composer, nginx
 
 _nginx config:
@@ -85,13 +92,10 @@ _nginx config:
 server {
         listen 80;
         listen [::]:80;
-        server_name my_ip_address;
-        root /var/www/wholesale-linker-admin/public;
+        server_name wholesalelinker.com www.wholesalelinker.com;
+        root /var/www/wholesale-linker-admin;
 
-        add_header X-Frame-Options "SAMEORIGIN";
-        add_header X-Content-Type-Options "nosniff";
-
-        index index.php;
+        index index.php index.html index.htm;
 
         charset utf-8;
 
@@ -105,39 +109,57 @@ server {
         error_page 404 /index.php;
 
         location ~ \.php$ {
-            fastcgi_pass   unix:/var/run/php/php8.2-fpm.sock;
-            fastcgi_param  SCRIPT_FILENAME    $realpath_root$fastcgi_script_name;
-            include        fastcgi_params;
+                fastcgi_index  index.php;
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                fastcgi_pass    unix:/var/run/php/php8.2-fpm.sock;
+                fastcgi_param   PATH_INFO       $fastcgi_path_info;
+                fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                include         fastcgi_params;
         }
 
         location ~ /\.(?!well-known).* {
             deny all;
         }
 }
+
 ```
 
 _sql config:
 
 ```
-sudo mysql
-CREATE DATABASE wholesalelinker;
-CREATE USER 'demoAdmin'@'localhost' IDENTIFIED BY 'your-password-here';
-GRANT ALL PRIVILEGES ON wholesalelinker . * TO 'demoAdmin'@'localhost';
+
+sudo mysql -u root -p
+CREATE DATABASE db_name;
+CREATE USER 'db_user'@'localhost' IDENTIFIED BY 'db_password';
+GRANT ALL PRIVILEGES ON db_name . * TO 'db_user'@'localhost';
+
 ```
 
 _create .env in project root folder:
 
 ```
+
+APP_NAME=WholesaleLinker
+APP_ENV=development
+APP_KEY=APPLICATION_UNIQUE_KEY_DONT_COPY
+APP_DEBUG=true
+APP_URL=http://ip_address
+
+LOG_CHANNEL=stack
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=wholesalelinker
-DB_USERNAME=demoAdmin
-DB_PASSWORD=your-password-here
-```
-
-_run command:
+DB_DATABASE=db_name
+DB_USERNAME=db_user
+DB_PASSWORD=db_password
 
 ```
-php composer.phar install
+
+_SSL:
+
+```
+apt install certbot python3-certbot-nginx
+ufw allow 'Nginx Full'
+sudo certbot --nginx -d wholesalelinker.com -d www.wholesalelinker.com
 ```
