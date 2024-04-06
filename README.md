@@ -140,3 +140,4 @@ _run command:
 
 ```
 php composer.phar install
+```
