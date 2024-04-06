@@ -61,8 +61,8 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
+## Design changed
 
-## Design changed:
     #theme.minc619.css-> removed:
         .page-header{
             border-bottom:.0625rem solid #e7eaf3;
@@ -72,3 +72,71 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
         .select2-container--default .select2-selection--single{
             background-color:#fff;display: block;width: 100%;height: calc(1.6em + 1.21875rem);padding: .54688rem .875rem;font-size: .875rem;font-weight: 400;line-height: 1.6;color: #1e2022;background-color: #fff;background-clip: padding-box;border: .0625rem solid #e7eaf3;border-radius: .3125rem;transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
             }
+
+## Server config
+
+_ clone project to `/var/www/wholesale-linker-admin`
+
+_install php, mysql, composer, nginx
+
+_nginx config:
+
+```
+server {
+        listen 80;
+        listen [::]:80;
+        server_name my_ip_address;
+        root /var/www/wholesale-linker-admin/public;
+
+        add_header X-Frame-Options "SAMEORIGIN";
+        add_header X-Content-Type-Options "nosniff";
+
+        index index.php;
+
+        charset utf-8;
+
+        location / {
+                try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location = /favicon.ico { access_log off; log_not_found off; }
+        location = /robots.txt  { access_log off; log_not_found off; }
+
+        error_page 404 /index.php;
+
+        location ~ \.php$ {
+            fastcgi_pass   unix:/var/run/php/php8.2-fpm.sock;
+            fastcgi_param  SCRIPT_FILENAME    $realpath_root$fastcgi_script_name;
+            include        fastcgi_params;
+        }
+
+        location ~ /\.(?!well-known).* {
+            deny all;
+        }
+}
+```
+
+_sql config:
+
+```
+sudo mysql
+CREATE DATABASE wholesalelinker;
+CREATE USER 'demoAdmin'@'localhost' IDENTIFIED BY 'your-password-here';
+GRANT ALL PRIVILEGES ON wholesalelinker . * TO 'demoAdmin'@'localhost';
+```
+
+_create .env in project root folder:
+
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=wholesalelinker
+DB_USERNAME=demoAdmin
+DB_PASSWORD=your-password-here
+```
+
+_run command:
+
+```
+php composer.phar install
