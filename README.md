@@ -72,3 +72,9 @@ ufw allow 'Nginx Full'
 apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d wholesalelinker.com -d www.wholesalelinker.com
 ```
+
+_If get CORS error, add this to nginx config:
+
+```
+add_header Access-Control-Allow-Origin $http_origin;
+```
